@@ -1,7 +1,7 @@
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    Manager,
+    Manager, WebviewUrl, WebviewWindowBuilder,
 };
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -30,6 +30,16 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet, toggle_always_on_top])
         .setup(|app| {
+            let docs_window = WebviewWindowBuilder::new(
+                app,
+                "external", /* the unique window label */
+                WebviewUrl::External("https://tauri.app/".parse().unwrap()),
+            )
+            .build()?;
+            let local_window =
+                WebviewWindowBuilder::new(app, "local", WebviewUrl::App("index.html".into()))
+                    .build()?;
+
             let quit_menu = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit_menu])?;
 
