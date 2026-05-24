@@ -5,7 +5,7 @@
   "identifier": "xyz.mycast.snowmeter",
   "build": {
     "beforeDevCommand": "pnpm dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:1421",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../build"
   },
@@ -15,7 +15,9 @@
         "title": "snowmeter",
         "width": 800,
         "height": 600,
-        "decorations": false
+        "decorations": false,
+        "transparent": true,
+        "visible": false
       }
     ],
     "security": {

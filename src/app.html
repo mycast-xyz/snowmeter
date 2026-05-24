@@ -5,9 +5,71 @@
     <link rel="icon" href="%sveltekit.assets%/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tauri + SvelteKit + Typescript App</title>
+    <script>
+      // Redirect console logs to the screen for visual debugging
+      (function() {
+        var logs = [];
+        var maxLines = 15;
+        function showLog(type, args) {
+          var msg = "[" + type + "] " + args.map(function(arg) {
+            try {
+              return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+            } catch(e) { return String(arg); }
+          }).join(" ");
+          logs.push(msg);
+          if (logs.length > maxLines) logs.shift();
+          var el = document.getElementById("fallback-error-text");
+          if (el) el.innerText = logs.join("\n");
+        }
+
+        var origLog = console.log;
+        console.log = function() {
+          origLog.apply(console, arguments);
+          showLog("LOG", Array.prototype.slice.call(arguments));
+        };
+
+        var origErr = console.error;
+        console.error = function() {
+          origErr.apply(console, arguments);
+          showLog("ERR", Array.prototype.slice.call(arguments));
+        };
+
+        var origWarn = console.warn;
+        console.warn = function() {
+          origWarn.apply(console, arguments);
+          showLog("WARN", Array.prototype.slice.call(arguments));
+        };
+      })();
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        var errStr = "JS Error: " + message + "\nSource: " + source + "\nLine: " + lineno + ":" + colno + "\nStack: " + (error ? error.stack : '');
+        alert(errStr);
+        console.error(errStr);
+        return false;
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        var errStr = "Unhandled Promise Rejection: " + event.reason + "\nStack: " + (event.reason ? event.reason.stack : '');
+        alert(errStr);
+        console.error(errStr);
+      });
+      if (typeof window !== 'undefined' && window.location.pathname.endsWith('/index.html')) {
+        const newUrl = window.location.protocol + '//' + window.location.host + '/' + window.location.search;
+        window.history.replaceState(null, '', newUrl);
+      }
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
-    <div style="display: contents">%sveltekit.body%</div>
+    <div style="display: contents">
+      %sveltekit.body%
+      <!-- Fallback static UI shown if Svelte JS fails to mount/init -->
+      <div id="fallback-loading-ui" style="position: fixed; inset: 0; background: #0b0f19; color: #f8fafc; display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; font-size: 12px; border: 2px solid #ef4444; box-sizing: border-box; border-radius: 12px; z-index: 1;">
+        <div style="text-align: center; padding: 16px; width: 90%; max-width: 500px;">
+          <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: #ef4444;">❄️ SNOWMETER WEBVIEW</div>
+          <div style="color: #94a3b8; margin-bottom: 12px;">SvelteKit 프레임워크 마운트 대기 중...</div>
+          <div style="font-family: monospace; font-size: 10px; color: #fca5a5; white-space: pre-wrap; word-break: break-all; text-align: left; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; max-height: 250px; overflow-y: auto;" id="fallback-error-text"></div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
